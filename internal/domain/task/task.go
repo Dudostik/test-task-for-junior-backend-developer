@@ -17,6 +17,11 @@ type Task struct {
 	Status      Status    `json:"status"`
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
+
+	PatternID    *int64     `json:"pattern_id,omitempty"`
+	IsGenerated  bool       `json:"is_generated"`
+	OriginalDate *time.Time `json:"original_date,omitempty"`
+	ParentTaskID *int64     `json:"parent_task_id,omitempty"`
 }
 
 func (s Status) Valid() bool {

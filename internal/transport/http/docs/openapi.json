@@ -131,6 +131,121 @@
           "404": { "$ref": "#/components/responses/NotFound" }
         }
       }
+    },
+    "/api/v1/patterns": {
+      "get": {
+        "tags": ["Patterns"],
+        "summary": "List patterns",
+        "responses": {
+          "200": {
+            "description": "Pattern list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/TaskPattern" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Patterns"],
+        "summary": "Create pattern",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CreatePatternRequest" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created pattern",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/TaskPattern" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" }
+        }
+      }
+    },
+    "/api/v1/patterns/{id}": {
+      "get": {
+        "tags": ["Patterns"],
+        "summary": "Get pattern by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "format": "int64", "minimum": 1 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pattern",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/TaskPattern" }
+              }
+            }
+          },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      },
+      "put": {
+        "tags": ["Patterns"],
+        "summary": "Update pattern",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "format": "int64", "minimum": 1 }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UpdatePatternRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated pattern",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/TaskPattern" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      },
+      "delete": {
+        "tags": ["Patterns"],
+        "summary": "Delete pattern",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "format": "int64", "minimum": 1 }
+          }
+        ],
+        "responses": {
+          "204": { "description": "Deleted" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      }
     }
   },
   "components": {
@@ -214,7 +329,75 @@
             "type": "string",
             "format": "date-time",
             "example": "2026-03-24T00:00:00Z"
+          },
+          "pattern_id": {
+            "type": "integer", 
+            "format": "int64", 
+            "nullable": true 
+          },
+          "is_generated": { 
+            "type": "boolean", 
+            "example": false 
+          },
+          "original_date": { 
+            "type": "string", 
+            "format": "date", 
+            "nullable": true 
+          },
+          "parent_task_id": { 
+            "type": "integer", 
+            "format": "int64", 
+            "nullable": true 
           }
+        }
+      },
+      "CreatePatternRequest": {
+        "type": "object",
+        "required": ["name", "type"],
+        "properties": {
+          "name": { "type": "string", "example": "Daily checkup" },
+          "description": { "type": "string", "example": "Check patients every day" },
+          "type": { "type": "string", "enum": ["daily", "monthly", "specific", "even_odd"], "example": "daily" },
+          "interval_days": { "type": "integer", "minimum": 1, "example": 1 },
+          "day_of_month": { "type": "integer", "minimum": 1, "maximum": 30, "example": 5 },
+          "specific_dates": { "type": "array", "items": { "type": "string", "format": "date-time" }, "example": ["2024-12-25T00:00:00Z"] },
+          "even_odd_type": { "type": "string", "enum": ["even", "odd"], "example": "even" },
+          "start_date": { "type": "string", "format": "date-time", "nullable": true },
+          "end_date": { "type": "string", "format": "date-time", "nullable": true },
+          "is_active": { "type": "boolean", "example": true }
+        }
+      },
+      "UpdatePatternRequest": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "example": "Daily checkup updated" },
+          "description": { "type": "string", "example": "Updated description" },
+          "type": { "type": "string", "enum": ["daily", "monthly", "specific", "even_odd"] },
+          "interval_days": { "type": "integer", "minimum": 1 },
+          "day_of_month": { "type": "integer", "minimum": 1, "maximum": 30 },
+          "specific_dates": { "type": "array", "items": { "type": "string", "format": "date-time" } },
+          "even_odd_type": { "type": "string", "enum": ["even", "odd"] },
+          "start_date": { "type": "string", "format": "date-time", "nullable": true },
+          "end_date": { "type": "string", "format": "date-time", "nullable": true },
+          "is_active": { "type": "boolean" }
+        }
+      },
+      "TaskPattern": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int64", "example": 1 },
+          "name": { "type": "string", "example": "Daily checkup" },
+          "description": { "type": "string", "example": "Check patients every day" },
+          "type": { "type": "string", "enum": ["daily", "monthly", "specific", "even_odd"], "example": "daily" },
+          "interval_days": { "type": "integer", "nullable": true },
+          "day_of_month": { "type": "integer", "nullable": true },
+          "specific_dates": { "type": "array", "items": { "type": "string", "format": "date-time" } },
+          "even_odd_type": { "type": "string", "enum": ["even", "odd"], "nullable": true },
+          "start_date": { "type": "string", "format": "date-time", "nullable": true },
+          "end_date": { "type": "string", "format": "date-time", "nullable": true },
+          "is_active": { "type": "boolean", "example": true },
+          "created_at": { "type": "string", "format": "date-time" },
+          "updated_at": { "type": "string", "format": "date-time" }
         }
       },
       "Error": {

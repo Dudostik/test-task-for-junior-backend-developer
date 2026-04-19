@@ -9,7 +9,7 @@ import (
 	httphandlers "example.com/taskservice/internal/transport/http/handlers"
 )
 
-func NewRouter(taskHandler *httphandlers.TaskHandler, docsHandler *swaggerdocs.Handler) *mux.Router {
+func NewRouter(taskHandler *httphandlers.TaskHandler, patternHandler *httphandlers.PatternHandler, docsHandler *swaggerdocs.Handler) *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
 
 	router.HandleFunc("/swagger/openapi.json", docsHandler.ServeSpec).Methods(http.MethodGet)
@@ -23,6 +23,12 @@ func NewRouter(taskHandler *httphandlers.TaskHandler, docsHandler *swaggerdocs.H
 	api.HandleFunc("/tasks/{id:[0-9]+}", taskHandler.GetByID).Methods(http.MethodGet)
 	api.HandleFunc("/tasks/{id:[0-9]+}", taskHandler.Update).Methods(http.MethodPut)
 	api.HandleFunc("/tasks/{id:[0-9]+}", taskHandler.Delete).Methods(http.MethodDelete)
+
+	api.HandleFunc("/patterns", patternHandler.Create).Methods(http.MethodPost)
+	api.HandleFunc("/patterns", patternHandler.List).Methods(http.MethodGet)
+	api.HandleFunc("/patterns/{id:[0-9]+}", patternHandler.GetByID).Methods(http.MethodGet)
+	api.HandleFunc("/patterns/{id:[0-9]+}", patternHandler.Update).Methods(http.MethodPut)
+	api.HandleFunc("/patterns/{id:[0-9]+}", patternHandler.Delete).Methods(http.MethodDelete)
 
 	return router
 }
